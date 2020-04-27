@@ -18,20 +18,39 @@ export class CompassControl extends maptalks.control.Control {
         this._compass = compass
         const transform = this.options['transform']
         const bgColor = this.options['backgroundColor']
-        let style = `background-color: ${bgColor};`
+        let style = `background-color: ${bgColor};cursor:pointer;`
         if (transform) style += ` transform: ${transform};`
-        maptalks.DomUtil.setStyle(this._compass, style)
+        maptalks.DomUtil.setStyle(this._compass, style);
+        maptalks.DomUtil.on(compass, 'click', () => {
+            const bearing = this.getMap().getBearing();
+            const origalBearing = bearing;
+            if (this._showPlayer) {
+                this._showPlayer.cancel();
+            }
+            const duration = 500;
+            const easing = 'out';
+            const player = this._showPlayer = maptalks.animation.Animation.animate({
+                'bearing': bearing
+            }, {
+                'duration': duration,
+                'easing': easing
+            }, frame => {
+                const bearing = frame.styles.bearing;
+                this.getMap().setBearing(origalBearing - bearing);
+            });
+            player.play();
+        }, this);
         return compass
     }
 
     onAdd() {
         this.map = this.getMap()
-        this.map.on('mousemove animating', this._rotateCompass, this)
+        this.map.on('mousemove animating animatestart animateend dragrotating viewchange', this._rotateCompass, this)
         this._rotateCompass()
     }
 
     onRemove() {
-        this.map.off('mousemove animating', this._rotateCompass, this)
+        this.map.off('mousemove animating animatestart animateend dragrotating viewchange', this._rotateCompass, this)
         this._compass.remove()
         delete this._deg
         delete this._compass
