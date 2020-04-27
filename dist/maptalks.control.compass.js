@@ -1,7 +1,7 @@
 /*!
  * maptalks.control.compass v0.1.2
  * LICENSE : MIT
- * (c) 2016-2019 maptalks.org
+ * (c) 2016-2020 maptalks.org
  */
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -39,24 +39,45 @@ var CompassControl = function (_maptalks$control$Con) {
     }
 
     CompassControl.prototype.buildOn = function buildOn(map) {
+        var _this2 = this;
+
         var compass = this._getCompass();
         this._compass = compass;
         var transform = this.options['transform'];
         var bgColor = this.options['backgroundColor'];
-        var style = 'background-color: ' + bgColor + ';';
+        var style = 'background-color: ' + bgColor + ';cursor:pointer;';
         if (transform) style += ' transform: ' + transform + ';';
         maptalks.DomUtil.setStyle(this._compass, style);
+        maptalks.DomUtil.on(compass, 'click', function () {
+            var bearing = _this2.getMap().getBearing();
+            var origalBearing = bearing;
+            if (_this2._showPlayer) {
+                _this2._showPlayer.cancel();
+            }
+            var duration = 500;
+            var easing = 'out';
+            var player = _this2._showPlayer = maptalks.animation.Animation.animate({
+                'bearing': bearing
+            }, {
+                'duration': duration,
+                'easing': easing
+            }, function (frame) {
+                var bearing = frame.styles.bearing;
+                _this2.getMap().setBearing(origalBearing - bearing);
+            });
+            player.play();
+        }, this);
         return compass;
     };
 
     CompassControl.prototype.onAdd = function onAdd() {
         this.map = this.getMap();
-        this.map.on('mousemove animating', this._rotateCompass, this);
+        this.map.on('mousemove animating animatestart animateend dragrotating viewchange', this._rotateCompass, this);
         this._rotateCompass();
     };
 
     CompassControl.prototype.onRemove = function onRemove() {
-        this.map.off('mousemove animating', this._rotateCompass, this);
+        this.map.off('mousemove animating animatestart animateend dragrotating viewchange', this._rotateCompass, this);
         this._compass.remove();
         delete this._deg;
         delete this._compass;
