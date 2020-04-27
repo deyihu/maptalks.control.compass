@@ -1,6 +1,6 @@
 {
   "name": "maptalks.compass",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A maptalks Compass Control.",
   "license": "MIT",
   "author": "cXiaof",
@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/cXiaof/maptalks.control.compass.git"
   },
-  "main": "dist/maptalks.control.compass.min.js",
+  "main": "dist/maptalks.compass.min.js",
   "style": "css/maptalks.control.compass.css",
   "keywords": [
     "maptalks",
